@@ -283,7 +283,7 @@
       <span id="device-label">기기 감지 중...</span>
     </div>
 
-    <a id="btn-smart" href="#" class="btn-primary" onclick="handleSmartClick(event)">
+    <a id="btn-smart" href="#" class="btn-primary">
       <svg id="store-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"></svg>
       <span id="btn-label">앱 다운로드</span>
     </a>
@@ -345,14 +345,7 @@
       storeIcon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>';
     }
 
-    function handleSmartClick(e) {
-      if (!isIOS && !isAndroid) return; // desktop: just follow href
-      e.preventDefault();
-      document.getElementById('overlay').classList.add('show');
-      setTimeout(() => {
-        window.location.href = btnSmart.href;
-      }, 600);
-    }
+
   </script>
 </body>
 </html>
