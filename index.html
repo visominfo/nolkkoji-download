@@ -191,125 +191,23 @@
     var IOS_STORE = 'https://apps.apple.com/us/app/%EB%86%80%EA%BC%AC%EC%A7%80/id6753740768';
     var ANDROID_STORE = 'https://play.google.com/store/apps/details?id=com.visom.nolkkoji';
 
-    function getMokkojiId() {
-      var params = new URLSearchParams(window.location.search);
-      if (params.get('mokkojiId')) return params.get('mokkojiId');
-      var segments = window.location.pathname.replace(/\/$/, '').split('/');
-      var last = segments[segments.length - 1];
-      if (last && last !== 'mokkoji') return last;
-      var hash = window.location.hash.replace('#', '');
-      if (hash) return hash;
-      return null;
-    }
-
-    var mokkojiId = getMokkojiId();
     var ua = navigator.userAgent;
     var isIOS = /iPhone|iPad|iPod/i.test(ua);
-    var isAndroid = /Android/i.test(ua);
-
-    // ✅ 인앱 브라우저 감지
-    var isKakao = /KAKAOTALK/i.test(ua);
-    var isInsta = /Instagram/i.test(ua);
-    var isFacebook = /FBAN|FBAV|FB_IAB/i.test(ua);
-    var isNaver = /NAVER/i.test(ua);
-    var isLine = /Line\//i.test(ua);
-    var isInAppBrowser = isKakao || isInsta || isFacebook || isNaver || isLine;
 
     var btnOpen = document.getElementById('btn-open');
-    var btnLabel = document.getElementById('btn-label');
     var btnIcon = document.getElementById('btn-icon');
     var statusLabel = document.getElementById('status-label');
 
     // 아이콘 설정
     if (isIOS) {
       btnIcon.innerHTML = '<path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>';
+      btnOpen.href = IOS_STORE;
     } else {
       btnIcon.innerHTML = '<path d="M3.18 23.76c.3.17.64.22.98.15l13.05-7.52-2.75-2.75-11.28 10.12zm-1.7-20.1C1.17 4 1 4.5 1 5.09v13.82c0 .59.17 1.09.48 1.43l.08.07 7.74-7.74v-.18L1.56 3.59l-.08.07zM20.49 10.7l-2.78-1.6-3.09 3.09 3.09 3.08 2.8-1.61c.8-.46.8-1.5-.02-1.96zM4.16.26L17.21 7.78l-2.75 2.75L3.18.41C3.52.34 3.87.39 4.16.56z"/>';
+      btnOpen.href = ANDROID_STORE;
     }
 
-    // ✅ 인앱 브라우저에서 외부 브라우저로 보내는 UI 표시
-    function showInAppBrowserGuide() {
-      statusLabel.textContent = '외부 브라우저에서 열어주세요';
-      btnLabel.textContent = isAndroid ? '브라우저에서 열기' : 'Safari에서 열기';
-
-      if (isAndroid) {
-        // Android: intent:// 스킴으로 크롬 강제 이동 시도
-        var intentUrl = mokkojiId
-          ? 'intent://tabs/mokkoji/detail?mokkojiId=' + mokkojiId + '#Intent;scheme=nolkkoji;package=com.visom.nolkkoji;S.browser_fallback_url=' + encodeURIComponent(ANDROID_STORE) + ';end'
-          : 'intent://#Intent;scheme=nolkkoji;package=com.visom.nolkkoji;S.browser_fallback_url=' + encodeURIComponent(ANDROID_STORE) + ';end';
-        btnOpen.href = intentUrl;
-      } else {
-        // iOS 인앱브라우저: 스토어 직접 이동
-        btnOpen.href = IOS_STORE;
-        btnOpen.removeAttribute('target');
-      }
-
-      // 안내 문구 추가
-      var guide = document.createElement('p');
-      guide.style.cssText = 'font-size:12px;color:#888;margin-top:10px;line-height:1.6;';
-      guide.innerHTML = isAndroid
-        ? '카카오/인스타 등 앱 내 브라우저에서는<br>위 버튼을 눌러 Chrome으로 이동 후 앱을 여세요'
-        : '우측 하단 <b>···</b> 메뉴 → <b>Safari로 열기</b>를 탭하세요';
-      btnOpen.parentNode.insertBefore(guide, btnOpen.nextSibling);
-    }
-
-    var redirectTimer;
-
-    function tryOpenApp() {
-      var deepLink = mokkojiId
-        ? 'nolkkoji:///tabs/mokkoji/detail?mokkojiId=' + mokkojiId
-        : 'nolkkoji://';
-
-      if (isAndroid) {
-        // Android: intent:// 스킴 사용 (크롬에서도 동작, 앱 없으면 스토어 이동)
-        var intentUrl = mokkojiId
-          ? 'intent://tabs/mokkoji/detail?mokkojiId=' + mokkojiId + '#Intent;scheme=nolkkoji;package=com.visom.nolkkoji;S.browser_fallback_url=' + encodeURIComponent(ANDROID_STORE) + ';end'
-          : 'intent://#Intent;scheme=nolkkoji;package=com.visom.nolkkoji;S.browser_fallback_url=' + encodeURIComponent(ANDROID_STORE) + ';end';
-        window.location.href = intentUrl;
-        // intent:// 는 자체 fallback 있으므로 별도 타이머 불필요
-        return;
-      }
-
-      // iOS 일반 브라우저
-      window.location.href = deepLink;
-      redirectTimer = setTimeout(function () {
-        statusLabel.textContent = '앱이 설치되지 않았습니다. 스토어로 이동합니다...';
-        setTimeout(function () {
-          window.location.href = IOS_STORE;
-        }, 800);
-      }, 1500);
-    }
-
-    window.addEventListener('blur', function () {
-      clearTimeout(redirectTimer);
-      statusLabel.textContent = '앱이 열렸습니다!';
-    });
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        clearTimeout(redirectTimer);
-        statusLabel.textContent = '앱이 열렸습니다!';
-      }
-    });
-
-    btnOpen.addEventListener('click', function (e) {
-      if (isInAppBrowser && isIOS) return; // href 그대로 동작
-      e.preventDefault();
-      statusLabel.textContent = '앱 연결 시도 중...';
-      tryOpenApp();
-    });
-
-    // 진입 시 자동 처리
-    if (isInAppBrowser) {
-      // ✅ 인앱 브라우저: 자동 딥링크 시도 안 하고 안내만 표시
-      showInAppBrowserGuide();
-    } else if (isIOS || isAndroid) {
-      setTimeout(function () {
-        statusLabel.textContent = '앱 연결 시도 중...';
-        tryOpenApp();
-      }, 600);
-    } else {
-      statusLabel.textContent = '모바일에서 링크를 열어주세요';
-    }
+    statusLabel.textContent = '스토어에서 다운로드하세요';
 </script>
 </body>
 </html>
