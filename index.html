@@ -214,7 +214,7 @@
 
   if (mokkojiId && isMobile) {
     // ✅ 모꼬지 공유 링크 → 딥링크 시도
-    var deepLink = 'nolkkoji:///tabs/mokkoji/detail?mokkojiId=' + encodeURIComponent(mokkojiId);
+    var deepLink = 'nolkkoji://?mokkojiId=' + encodeURIComponent(mokkojiId);
 
     badgeLabel.textContent = 'MOKKOJI INVITE';
     btnIcon.innerHTML = '<path d="' + (isIOS ? iosPath : androidPath) + '"/>';
